@@ -15,6 +15,9 @@ New line</textarea>
     <input type="range" id="dist" min="-10" max="10" value="0">
     <label id="rangeVal" for="dist">0</label>
     <br>
+    <label for="randY">Randomize letter height:</label>
+    <input type="checkbox" id="randY" />
+    <br>
     <label for="seed">Seed:</label>
     <input type="text" id="seed" autocomplete="off">
     <button id="reseed" onclick="
@@ -27,7 +30,7 @@ New line</textarea>
     <p>Right click the area to save the image!</p>
 
     <script>
-        var validChars = {
+        var characterDataset = {
             a: 4,
             b: 1,
             c: 2,
@@ -96,7 +99,10 @@ New line</textarea>
         var distObj = document.getElementById("dist");
         distObj.addEventListener('input', function(evt) {
             document.getElementById("rangeVal").innerText = distObj.value;
-
+            renderImage();
+        });
+        var randHeight = document.getElementById("randY");
+        randHeight.addEventListener('input', function(evt) {
             renderImage();
         });
 
@@ -117,7 +123,7 @@ New line</textarea>
 
             var sources = [];
             for (i = 0; i < chars.length; i++) {
-                if (validChars[chars[i]] != null) {
+                if (characterDataset[chars[i]] != null) {
                     sources.push(getImagePath(chars[i], i));
                 } else if (chars[i] == " ") {
                     sources.push(i + "#space");
@@ -147,14 +153,20 @@ New line</textarea>
                     }
                     offsetX = offsetX + offsetWidth + distObj.value / 1.0;
                 }
-                var lastLineHeight = 0;
+                var lastLineHeight = 10;
+                var counter = 0;
                 imagesToDraw.forEach(line => {
                     var lineHeight = 0;
                     line.forEach(img => {
-                        ctx.drawImage(img[0], img[1], lastLineHeight);
+                        var posY = lastLineHeight;
+                        if (randHeight.checked) {
+                            posY = posY + seededRandom(seedBox.value + counter, 5) - 2;
+                        }
+                        ctx.drawImage(img[0], img[1], posY);
                         if (lineHeight < img[0].height) {
                             lineHeight = img[0].height;
                         }
+                        counter++;
                     });
                     lastLineHeight = lastLineHeight + lineHeight
                 });
@@ -184,7 +196,7 @@ New line</textarea>
         }
 
         function getImagePath(char, itter) {
-            var imageNum = seededRandom(seedBox.value + itter, validChars[char]) + 1;
+            var imageNum = seededRandom(seedBox.value + itter, characterDataset[char]) + 1;
             for (const [key, value] of Object.entries(replaceLookup)) {
                 char = char.replace(key, value);
             }
