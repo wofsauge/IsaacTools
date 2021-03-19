@@ -4,13 +4,17 @@
 <body>
 
     <h1>Text generator</h1>
-    <label for="fname">Text: </label>
+    <label for="text">Text: </label>
     <textarea id="text" rows="4" cols="25" autocomplete="off">Some demo Text.-&sol;!?$ @§
 % New line
 1234567890
     </textarea>
     <br>
-    <label for="fname">Seed:</label>
+    <label for="dist">Letter-distance:</label>
+    <input type="range" id="dist" min="-10" max="10" value="0">
+    <label id="rangeVal" for="dist">0</label>
+    <br>
+    <label for="seed">Seed:</label>
     <input type="text" id="seed" autocomplete="off">
     <button id="reseed" onclick="
     seedBox.value = getRandomInt(999999);renderImage();" autocomplete="off">Reseed</button>
@@ -88,6 +92,13 @@
             renderImage();
         });
 
+        var distObj = document.getElementById("dist");
+        distObj.addEventListener('input', function(evt) {
+            document.getElementById("rangeVal").innerText = distObj.value;
+
+            renderImage();
+        });
+
 
         var inputBox = document.getElementById("text");
         inputBox.addEventListener('input', function(evt) {
@@ -133,7 +144,7 @@
                         imagesToDraw[lineCount].push([value, offsetX, offsetY]);
                         offsetWidth = value.width;
                     }
-                    offsetX = offsetX + offsetWidth;
+                    offsetX = offsetX + offsetWidth + distObj.value / 1.0;
                 }
                 imagesToDraw.forEach(line => {
                     line.forEach(img => {
