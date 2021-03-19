@@ -5,8 +5,8 @@
 
     <h1>Text generator</h1>
     <label for="fname">Text: </label>
-    <textarea id="text" rows="4" cols="25" autocomplete="off">Some demo Text !?$
-New line
+    <textarea id="text" rows="4" cols="25" autocomplete="off">Some demo Text.-&sol;!?$ @§
+% New line
 1234567890
     </textarea>
     <br>
@@ -19,7 +19,7 @@ New line
     <canvas id="textCanvas" style="border: 1px dotted black;">
         Your browser does not support the canvas tag.
         </canvas>
-
+    <p>Right click the area to save the image!</p>
 
     <script>
         var validChars = {
@@ -37,7 +37,7 @@ New line
             l: 2,
             m: 2,
             n: 2,
-            o: 4,
+            o: 2,
             p: 3,
             q: 1,
             r: 2,
@@ -49,21 +49,39 @@ New line
             x: 2,
             y: 1,
             z: 2,
-            "1": 1,
-            "2": 1,
-            "3": 3,
-            "4": 2,
-            "5": 1,
-            "6": 2,
-            "7": 2,
-            "8": 1,
-            "9": 1,
-            "0": 2,
+            "1": 2,
+            "2": 2,
+            "3": 4,
+            "4": 3,
+            "5": 2,
+            "6": 3,
+            "7": 3,
+            "8": 2,
+            "9": 2,
+            "0": 3,
             "!": 1,
             "?": 3,
             ".": 1,
-            "$": 3
+            "-": 1,
+            "$": 3,
+            "§": 1,
+            "@": 1,
+            "§": 1,
+            '/': 1,
+            '%': 1,
         };
+        var replaceLookup = {
+            "?": "question",
+            "!": "exclamation",
+            ".": "dot",
+            "-": "line",
+            "$": "dollar",
+            "§": "poop",
+            "@": "smile",
+            '/': "slash",
+            '%': "the",
+        };
+
         var seedBox = document.getElementById("seed");
         seedBox.value = getRandomInt(999999);
         seedBox.addEventListener('input', function(evt) {
@@ -149,8 +167,10 @@ New line
 
         function getImagePath(char, itter) {
             var imageNum = seededRandom(seedBox.value + itter, validChars[char]) + 1;
-            char = char.replace("!", "exclamation").replace("?", "question").replace(".", "dot").replace("$", "dollar");
-            return 'chars/' + char + imageNum + ".png";
+            for (const [key, value] of Object.entries(replaceLookup)) {
+                char = char.replace(key, value);
+            }
+            return 'chars/' + char + "_" + imageNum + ".png";
         }
 
         function seededRandom(seed, max) {
