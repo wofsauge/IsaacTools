@@ -5,10 +5,11 @@
 
     <h1>Text generator</h1>
     <label for="text">Text: </label>
-    <textarea id="text" rows="4" cols="25" autocomplete="off">Some demo Text.-&sol;!?$ @§
-% New line
+    <textarea id="text" rows="9" cols="30" autocomplete="off">Some demo Text.-&sol;!?$ @§
 1234567890
-    </textarea>
+--------
+   %
+New line</textarea>
     <br>
     <label for="dist">Letter-distance:</label>
     <input type="range" id="dist" min="-10" max="10" value="0">
@@ -133,7 +134,7 @@
                 var offsetY = 0;
                 for (const [key, value] of Object.entries(images)) {
                     if (("" + value).includes("#enter")) {
-                        offsetY = offsetY + 20;
+                        offsetY = offsetY + 1;
                         offsetX = 0;
                         lineCount++;
                         imagesToDraw.push([]);
@@ -146,10 +147,16 @@
                     }
                     offsetX = offsetX + offsetWidth + distObj.value / 1.0;
                 }
+                var lastLineHeight = 0;
                 imagesToDraw.forEach(line => {
+                    var lineHeight = 0;
                     line.forEach(img => {
-                        ctx.drawImage(img[0], img[1], img[2]);
+                        ctx.drawImage(img[0], img[1], lastLineHeight);
+                        if (lineHeight < img[0].height) {
+                            lineHeight = img[0].height;
+                        }
                     });
+                    lastLineHeight = lastLineHeight + lineHeight
                 });
             });
         }
