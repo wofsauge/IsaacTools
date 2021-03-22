@@ -27,7 +27,7 @@
         document.getElementById('picField').onchange = function(evt) {
             var tgt = evt.target || window.event.srcElement,
                 files = tgt.files;
-
+			canvas.clear()
             // FileReader support
             if (FileReader && files && files.length) {
                 var fr = new FileReader();
