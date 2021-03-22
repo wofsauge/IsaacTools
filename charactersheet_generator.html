@@ -1,0 +1,372 @@
+<!DOCTYPE html>
+<html>
+
+<script src="fabric.min.js"></script>
+
+<body>
+
+    <h1>Character-Sheet generator</h1>
+    <p>This tool automatically generates the Missing-No and teleport sprites on an uploaded character sheet.</p>
+
+    <form class="custom-file" id="picField" method="post" style="margin-bottom:5px" enctype="multipart/form-data">
+        <label class="custom-file-label" for="fileUpload">Open Imagefile...</label>
+        <input type="file" class="custom-file-input" id="fileUpload" name="userfile" accept="image/x-png">
+    </form>
+    <p id="fileInfo">Please load your character spritesheet...</p>
+    <br>
+    <div id="bg" style="background-color: rgb(211, 211, 211); border: 1px dotted black; background-repeat: no-repeat; background-image: url('previews/demo_sheet.png');">
+        <canvas id="c" height="512" width="512">
+        Your browser does not support the canvas tag.
+        </canvas>
+    </div>
+    <p>Right click the area to save the image!</p>
+
+    <script>
+        var canvas = new fabric.StaticCanvas('c');
+
+        document.getElementById('picField').onchange = function(evt) {
+            var tgt = evt.target || window.event.srcElement,
+                files = tgt.files;
+
+            // FileReader support
+            if (FileReader && files && files.length) {
+                var fr = new FileReader();
+                fr.onload = function() {
+                    var fileInput = document.getElementById('fileUpload');
+                    var img = URL.createObjectURL(fileInput.files[0])
+                        //render base parts
+                    imgPos.forEach(imgData => {
+                        fabric.Image.fromURL(img, function(oImg) {
+                            oImg.imageSmoothing = false
+                            oImg.width = imgData[0]
+                            oImg.height = imgData[1]
+                            if (imgData.length > 2) {
+                                oImg.left = imgData[2]
+                                oImg.top = imgData[3]
+                            }
+                            if (imgData.length > 4) {
+                                oImg.cropX = imgData[4]
+                                oImg.cropY = imgData[5]
+                            }
+                            if (imgData.length > 6) {
+                                oImg.flipX = imgData[6]
+                                oImg.flipY = imgData[7]
+                            }
+                            if (imgData.length >= 8) {
+                                oImg.rotate(imgData[8])
+                            }
+                            canvas.add(oImg);
+                        });
+                    });
+                    //teleport body no stretch
+                    fabric.Image.fromURL(img, function(oImg) {
+                        oImg.imageSmoothing = false
+                        oImg.width = 32
+                        oImg.height = 32
+                        oImg.cropY = 32
+                        oImg.left = 128
+                        oImg.top = 422
+                        var filter = new fabric.Image.filters.Brightness({
+                            brightness: 1
+                        });
+                        oImg.filters.push(filter);
+                        oImg.applyFilters();
+                        canvas.add(oImg);
+                    });
+                    //teleport head no stretch
+                    fabric.Image.fromURL(img, function(oImg) {
+                        oImg.imageSmoothing = false
+                        oImg.width = 32
+                        oImg.height = 32
+                        oImg.left = 128
+                        oImg.top = 412
+                        var filter = new fabric.Image.filters.Brightness({
+                            brightness: 1
+                        });
+                        oImg.filters.push(filter);
+                        oImg.applyFilters();
+                        canvas.add(oImg);
+                    });
+                    //teleport body no stretch
+                    fabric.Image.fromURL(img, function(oImg) {
+                        oImg.imageSmoothing = false
+                        oImg.width = 32
+                        oImg.height = 32
+                        oImg.cropY = 32
+                        oImg.left = 200
+                        oImg.top = 364
+                        oImg.scaleX = 0.5
+                        oImg.scaleY = 3
+                        var filter = new fabric.Image.filters.Brightness({
+                            brightness: 1
+                        });
+                        oImg.filters.push(filter);
+                        oImg.applyFilters();
+                        canvas.add(oImg);
+                    });
+                    //teleport head stretch
+                    fabric.Image.fromURL(img, function(oImg) {
+                        oImg.imageSmoothing = false
+                        oImg.width = 32
+                        oImg.height = 32
+                        oImg.left = 200
+                        oImg.top = 332
+                        oImg.scaleX = 0.5
+                        oImg.scaleY = 3
+                        var filter = new fabric.Image.filters.Brightness({
+                            brightness: 1
+                        });
+                        oImg.filters.push(filter);
+                        oImg.applyFilters();
+                        canvas.add(oImg);
+                    });
+
+                    var filename = fileInput.files[0].name;
+                    document.getElementById('fileInfo').innerHTML = "'" + filename + "'";
+
+                    document.getElementById('bg').style.backgroundImage = "";
+                };
+                fr.readAsDataURL(files[0]);
+            } else {
+                // fallback -- perhaps submit the input to an iframe and temporarily store
+                // them on the server until the user's session ends.
+            }
+            var imgPos = [
+                [ // randoms
+                    512,
+                    512 - 190,
+                ],
+                [ // row 1 head
+                    32,
+                    32,
+                    16,
+                    336,
+                ],
+                [ // row 1 head up left 1
+                    16,
+                    16,
+                    48,
+                    336,
+                ],
+                [ // row 1 head up left 2
+                    16,
+                    16,
+                    80,
+                    336,
+                ],
+                [ // row 2 head up left 3
+                    16,
+                    16,
+                    64,
+                    368,
+                ],
+                [ // row 2 head up left 4
+                    16,
+                    16,
+                    80,
+                    368,
+                ],
+                [ // row 2 head up left 5
+                    16,
+                    16,
+                    32,
+                    368,
+                    0,
+                    0,
+                    true,
+                    false
+                ],
+                [ // row 2 head up left 5
+                    16,
+                    16,
+                    80,
+                    384,
+                    0,
+                    0,
+                    false,
+                    true
+                ],
+                [ // row 2 head bottom right 1
+                    16,
+                    16,
+                    96,
+                    384,
+                    16,
+                    16,
+                    false,
+                    false
+                ],
+                [ // row 2 head up bottom right 2
+                    16,
+                    16,
+                    64,
+                    384,
+                    16,
+                    16,
+                    true,
+                    false
+                ],
+                [ // row 2 head up bottom right 3
+                    16,
+                    16,
+                    16,
+                    368,
+                    16,
+                    16,
+                    false,
+                    false
+                ],
+                [ // row 2 head up bottom right 4
+                    16,
+                    16,
+                    48,
+                    368,
+                    16,
+                    16,
+                    false,
+                    false
+                ],
+                [ // row 2 head up bottom right 5
+                    16,
+                    16,
+                    96,
+                    368,
+                    16,
+                    16,
+                    false,
+                    true
+                ],
+                [ // row 1 head up bottom right 1
+                    16,
+                    16,
+                    48,
+                    352,
+                    16,
+                    16,
+                    true,
+                    false
+                ],
+                [ // row 1 head up bottom right 2
+                    16,
+                    16,
+                    64,
+                    352,
+                    16,
+                    16,
+                    false,
+                    false
+                ],
+                [ // row 1 head up bottom right 3
+                    16,
+                    16,
+                    80,
+                    352,
+                    16,
+                    16,
+                    false,
+                    false
+                ],
+                [ // row 1 head up bottom right 4
+                    16,
+                    16,
+                    96,
+                    352,
+                    16,
+                    16,
+                    false,
+                    false
+                ],
+                [ // row 1 head up bottom right 4
+                    16,
+                    16,
+                    96,
+                    336,
+                    16,
+                    16,
+                    false,
+                    false
+                ],
+                [ // row 3 head up bottom right 1
+                    16,
+                    16,
+                    32,
+                    384,
+                    16,
+                    16,
+                    false,
+                    true
+                ],
+                [ // row 3 head up bottom right 2
+                    16,
+                    16,
+                    16,
+                    384,
+                    16,
+                    16,
+                    true,
+                    true
+                ],
+                [ // row 3 head up bottom right 3
+                    16,
+                    16,
+                    48,
+                    384,
+                    16,
+                    16,
+                    true,
+                    true
+                ],
+                [ // row 3 head up bottom right 3
+                    16,
+                    16,
+                    15,
+                    400,
+                    16,
+                    16,
+                    false,
+                    false,
+                    90
+                ],
+                [ // row 3 head up bottom right 3
+                    16,
+                    16,
+                    31,
+                    400,
+                    16,
+                    16,
+                    false,
+                    true,
+                    90
+                ],
+                [ // row 4 head up top left 1
+                    16,
+                    16,
+                    16,
+                    416,
+                    0,
+                    0,
+                    false,
+                    true,
+                    90
+                ],
+                [ // row 4 head up top left 2
+                    16,
+                    16,
+                    32,
+                    416,
+                    0,
+                    0,
+                    false,
+                    false,
+                    90
+                ],
+            ]
+        }
+
+        function drawStuff() {
+
+        }
+    </script>
+</body>
+
+</html>
