@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html>
+
+<script src="fabric.min.js"></script>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+
+<body>
+
+    <h1>Deathscreen generator for items</h1>
+    <p>This tool automatically generates a .anm2 file and a .png file to be used for your modded items to display the death screen icons.</p>
+
+    <label class="custom-file-label" for="numberInput">Input your number of items: </label>
+    <input type="number" id="numberInput" min="1" value="1">
+    <form class="custom-file" id="picField" style="margin-bottom:5px" enctype="multipart/form-data">
+        <label class="custom-file-label" for="fileUpload">Or upload your items.xml file...</label>
+        <input type="file" class="custom-file-input" id="fileUpload" accept="text/xml">
+    </form>
+    <br>
+    <label class="custom-file-label" for="pngFileName">PNG-File name or path: </label>
+    <input type="text" id="pngFileName" value="custom_death_items.png">
+    <br>
+    <label class="custom-file-label" for="skipFrames">Create intermediate entries: </label>
+    <input type="checkbox" id="skipFrames">
+    <label class="custom-file-label" for="skipFrames">(this will generate icons for undefined item-ids caused by non-consecutive id declarations e.g. ids: 1,6,10 will generate 1-10)</label>
+    <br>
+
+
+
+    <div id="bg" style="background-color: rgb(211, 211, 211); border: 1px dotted black;">
+        <div id="FailedItems" style="float:left; color:red">
+        </div>
+        <div style="float:left; margin-right:5px">
+            <span>Anm2 file:</span><br>
+            <textarea id="previewAnm2" rows="43" cols="60"></textarea>
+        </div>
+        <div>
+            <span>png file:</span><br>
+            <canvas id="previewCanvas" height="640" width="320" style="background-color: rgb(233, 233, 233);">
+            Your browser does not support the canvas tag.
+            </canvas>
+            <br><span>Right click the area to save the image!</span>
+        </div>
+    </div>
+
+
+
+
+
+    <script>
+        var canvas = new fabric.StaticCanvas('previewCanvas');
+        var xmlFile = '<AnimatedActor><Info CreatedBy="Unknown" CreatedOn="05.12.2021 15:52:51" Version="50" Fps="30" /><Content><Spritesheets><Spritesheet Path="custom_death_items.png" Id="0" /></Spritesheets><Layers><Layer Name="Items" Id="0" SpritesheetId="0" /></Layers><Nulls /><Events /></Content><Animations DefaultAnimation="icons"><Animation Name="icons" FrameNum="5" Loop="true"><RootAnimation><Frame XPosition="0" YPosition="0" XScale="100" YScale="100" Delay="1" Visible="true" RedTint="255" GreenTint="255" BlueTint="255" AlphaTint="255" RedOffset="0" GreenOffset="0" BlueOffset="0" Rotation="0" Interpolated="false" /></RootAnimation><LayerAnimations><LayerAnimation LayerId="0" Visible="true"><Frame XPosition="0" YPosition="0" XPivot="8" YPivot="8" XCrop="0" YCrop="0" Width="16" Height="16" XScale="100" YScale="100" Delay="1" Visible="true" RedTint="255" GreenTint="255" BlueTint="255" AlphaTint="255" RedOffset="0" GreenOffset="0" BlueOffset="0" Rotation="0" Interpolated="false" /></LayerAnimation></LayerAnimations><NullAnimations /><Triggers /></Animation></Animations></AnimatedActor>';
+        $("#previewAnm2").val(prettifyXml(xmlFile));
+        var uploadItems = [];
+
+        document.getElementById('numberInput').onchange = function(evt) {
+            createDeathNoteItems();
+        }
+        document.getElementById('pngFileName').onchange = function(evt) {
+            createDeathNoteItems();
+        }
+        document.getElementById('skipFrames').onchange = function(evt) {
+            createDeathNoteItems();
+        }
+
+        document.getElementById('picField').onchange = function(evt) {
+            var tgt = evt.target || window.event.srcElement,
+                files = tgt.files;
+            // FileReader support
+            if (FileReader && files && files.length) {
+                var fr = new FileReader();
+                fr.onload = function(e) {
+                    uploadItems = [];
+                    $("#FailedItems").html("");
+                    var xml = $.parseXML(e.target.result);
+                    var $items = $(xml).find("items");
+                    $items.children().each(function(x) {
+                        if (this.nodeName === "trinket") {
+                            return;
+                        }
+                        var id = $(this).attr("id");
+                        if (typeof id !== "undefined") {
+                            uploadItems.push(id);
+                        } else {
+                            $("#FailedItems").append("<p>Item \"" + $(this).attr("name") + "\" doesn't have an ID defined</p>");
+                        }
+                    });
+
+                    createDeathNoteItems();
+                };
+                fr.readAsText($("#fileUpload")[0].files[0]);
+            }
+
+        }
+
+        function createDeathNoteItems() {
+            var amount = $("#numberInput").val()
+            if (uploadItems.length > 0) {
+                amount = Math.max.apply(Math, uploadItems);
+            }
+            //Parse the given XML
+            canvas.clear();
+            var xml = $.parseXML(xmlFile);
+            var doSkipFrames = !$("#skipFrames").prop('checked');
+
+            // Change png name
+            var $spritesheet = $(xml).find("Spritesheet");
+            $spritesheet.attr("Path", $("#pngFileName").val());
+
+            // change framecount
+            var $animation = $(xml).find("Animation");
+            $animation.attr("FrameNum", amount);
+
+            // Add frames
+            var $layers = $(xml).find("LayerAnimations");
+            $layers.each(function() {
+                var $frame = $layers.find("Frame").clone();
+                $layers.find("Frame").remove();
+                var skipCount = 1;
+                var previousLayerNode = null;
+                for (let i = 0; i < amount; i++) {
+                    if (doSkipFrames && uploadItems.length > 0 && jQuery.inArray("" + (i + 1), uploadItems) == -1) {
+                        skipCount++;
+                        continue;
+                    }
+                    var newFrame = $frame.clone();
+                    var xCrop = 16 * (i % 20);
+                    var yCrop = Math.floor(i / 20) * 16;
+                    newFrame.attr("YCrop", yCrop);
+                    newFrame.attr("XCrop", xCrop);
+                    if (previousLayerNode !== null) {
+                        previousLayerNode.attr("Delay", skipCount);
+                    }
+                    skipCount = 1;
+                    previousLayerNode = newFrame.appendTo($(xml).find("LayerAnimation"));
+                }
+            });
+
+            var xmlString = (new XMLSerializer()).serializeToString(xml);
+            $("#previewAnm2").val(prettifyXml(xmlString));
+
+            for (let i = 0; i < amount; i++) {
+                if (doSkipFrames && uploadItems.length > 0 && jQuery.inArray("" + (i + 1), uploadItems) == -1) {
+                    continue;
+                }
+
+                fabric.Image.fromURL('data/custom_death_items.png', function(oImg) {
+                    var xCrop = 16 * (i % 20);
+                    var yCrop = Math.floor(i / 20) * 16;
+                    oImg.imageSmoothing = false;
+                    oImg.left = xCrop;
+                    oImg.top = yCrop;
+                    canvas.add(oImg);
+                });
+            }
+        }
+        createDeathNoteItems();
+
+        function prettifyXml(sourceXml) {
+            var xmlDoc = new DOMParser().parseFromString(sourceXml, 'application/xml');
+            var xsltDoc = new DOMParser().parseFromString([
+                // describes how we want to modify the XML - indent everything
+                '<xsl:stylesheet xmlns:xsl="http://www.w3.org/1999/XSL/Transform">',
+                '  <xsl:strip-space elements="*"/>',
+                '  <xsl:template match="para[content-style][not(text())]">', // change to just text() to strip space in text nodes
+                '    <xsl:value-of select="normalize-space(.)"/>',
+                '  </xsl:template>',
+                '  <xsl:template match="node()|@*">',
+                '    <xsl:copy><xsl:apply-templates select="node()|@*"/></xsl:copy>',
+                '  </xsl:template>',
+                '  <xsl:output indent="yes"/>',
+                '</xsl:stylesheet>',
+            ].join('\n'), 'application/xml');
+
+            var xsltProcessor = new XSLTProcessor();
+            xsltProcessor.importStylesheet(xsltDoc);
+            var resultDoc = xsltProcessor.transformToDocument(xmlDoc);
+            var resultXml = new XMLSerializer().serializeToString(resultDoc);
+            return resultXml;
+        };
+    </script>
+</body>
+
+</html>
