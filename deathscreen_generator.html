@@ -8,7 +8,9 @@
 
     <h1>Deathscreen generator for items</h1>
     <p>This tool automatically generates a .anm2 file and a .png file to be used for your modded items to display the death screen icons.</p>
-    <p><b>In order to make custom item icons work, each item.xml entry needs to have a unique "id" attribute defined!</b></p>
+    <p><b>In order to make custom item icons work, each items.xml entry needs to have a unique "id" attribute defined!</b></p>
+    <p>IDs located in a "content/items.xml" file are only locally used by the mod. They don't affect other mods and will NOT override existing vanilla items! They will also not define their ingame ID! Therefore, they are save to use and can start at 1 without
+        causing any conflicts or other issues.</p>
     <hr>
     <label class="custom-file-label" for="numberInput">Input your number of items: </label>
     <input type="number" id="numberInput" min="1" value="1">
