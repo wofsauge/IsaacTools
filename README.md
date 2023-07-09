@@ -20,3 +20,6 @@ Used to generate a .anm2 file for Death-screen item icons to be used for your mo
 The "*skin_color_variants.py*" script creates skin color variants of costume files.
 If takes a folder path as its starting argument in which every spritesheet will be processed.
 Custom color replacements can be defined at the top of the file.
+
+How to install Prerequirements:
+`python3 -m pip install --upgrade Pillow pathlib numpy`
